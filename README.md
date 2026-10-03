@@ -3,7 +3,7 @@
 </div>
 
 <div align="center">
-  <img src="assets/typing.gif" alt="typing" />
+  <img src="assets/typing.svg" alt="typing" />
 </div>
 
 ## 关于我
