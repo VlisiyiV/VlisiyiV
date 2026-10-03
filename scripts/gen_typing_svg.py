@@ -92,7 +92,7 @@ def main():
         for ch in t:
             if ch == " ":                     # 空格 = 分隔符(不占字停顿)
                 times.append(acc)
-                acc += SPACE_GAP              # 词间隔 = 1.5 字
+                acc += SPACE_GAP              # 词间隔 = 2 倍字停顿
                 continue
             acc += CJK_DELAY if is_cjk(ch) else CHAR_DELAY
             times.append(acc)                 # 本字(含符号)出现时刻
