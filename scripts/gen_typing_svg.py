@@ -14,9 +14,11 @@ import os, glob, random, sys
 from PIL import Image, ImageDraw, ImageFont
 
 SIZE, IDX, SCALE, PAD = 16, 2, 2, 2
-CHAR_DELAY, SPACE_DELAY, PUNCT_DELAY, HOLD, TAIL = 0.12, 0.40, 0.45, 2.20, 0.40
+CHAR_DELAY, PUNCT_DELAY, HOLD, TAIL = 0.08, 0.45, 2.20, 0.40
+SPACE_DELAY = CHAR_DELAY * 0.5   # 空格额外停顿 -> 词间隔 = 1.5 字
 PUNCT = set("，。；：！？、,.;:!?…—")
 FG, CURSOR, BG = "#22d3ee", "#e2e8f0", "#0d1117"
+CURSOR_W = 8   # 光标整块宽度
 
 ITEMS = ["原神", "明日方舟", "明日方舟：终末地", "Minecraft", "Github", "VS Code",
          "DeepSeek Harness", "ESP32 S3", "ESP8266", "Arduino IDE", "Arduino UNO"]
@@ -119,8 +121,28 @@ def main():
                      f'keyTimes="{kt}" calcMode="discrete" dur="{CYCLE}s" repeatCount="indefinite"/>'
                      + "".join(f'<rect x="{x}" y="{y}" width="{rw}" height="1" fill="{FG}"/>'
                                for (x, y, rw) in runs)
-                     + f'<rect x="{PAD+adv_a:g}" y="{PAD}" width="{SCALE*0.6:g}" height="{SIZE}" fill="{CURSOR}"/>'
-                     f'</g>')
+                     + '</g>')
+    # ---- 每行一个"整块"光标 (discrete 跳格, 行结束即消失) ----
+    for m in metas:
+        t_end = m["t0"] + m["type"] + HOLD
+        a0 = max(1e-4, m["t0"] / CYCLE)
+        ce = min(0.9999, t_end / CYCLE)
+        ce2 = min(0.99995, ce + 1e-4)
+        # x: 逐字跳格
+        kx, vx = [0.0], [PAD]
+        last = 0.0
+        for ci, (runs, adv_b, adv_a) in enumerate(m["cells"]):
+            k = max(last + 1e-6, (m["t0"] + m["times"][ci]) / CYCLE)
+            kx.append(k); vx.append(PAD + adv_a); last = k
+        kx.append(max(last + 1e-6, ce)); vx.append(vx[-1])
+        if kx[-1] < 1.0:
+            kx.append(1.0); vx.append(vx[-1])
+        fx = lambda arr: ";".join(f"{v:g}" for v in arr)
+        P.append(f'<rect y="{PAD}" width="{CURSOR_W}" height="{SIZE}" fill="{CURSOR}" opacity="0">'
+                 f'<animate attributeName="x" values="{fx(vx)}" keyTimes="{fx(kx)}" calcMode="discrete" dur="{CYCLE}s" repeatCount="indefinite"/>'
+                 f'<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;{a0:g};{ce:g};{ce2:g};1" calcMode="discrete" dur="{CYCLE}s" repeatCount="indefinite"/>'
+                 f'</rect>')
+
     P.append("</svg>")
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
