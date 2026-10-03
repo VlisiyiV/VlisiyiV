@@ -1,0 +1,36 @@
+name: 重新洗牌打字机动画
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"   # 每 6 小时随机重排一次
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/gen_typing_svg.py"
+
+permissions:
+  contents: write
+
+jobs:
+  shuffle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安装文泉驿正黑字体
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-wqy-zenhei
+      - name: 安装 Pillow
+        run: pip install -q pillow
+      - name: 重新生成 SVG
+        run: python scripts/gen_typing_svg.py
+      - name: 提交
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/typing.svg
+          git diff --staged --quiet || git commit -m "chore: 随机重排打字机动画"
+          git push
