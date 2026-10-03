@@ -115,7 +115,7 @@ def main():
     for i, m in enumerate(metas):
         ks, vs = keys(m)
         P.append(f'<clipPath id="cp{i}"><rect x="0" y="0" height="{VH}" width="0">'
-                 f'<animate attributeName="width" values="{fmt(vs)}" keyTimes="{fmt(ks)}" '
+                 f'<animate attributeName="width" calcMode="discrete" values="{fmt(vs)}" keyTimes="{fmt(ks)}" '
                  f'dur="{CYCLE}s" repeatCount="indefinite"/></rect></clipPath>')
     P.append("</defs>")
     P.append(f'<rect width="{VW}" height="{VH}" fill="#0d1117"/>')
@@ -134,7 +134,7 @@ def main():
         ok = f"0;{a:g};{a:g};{c:g};{k2:g};1"
         ov = "0;0;1;1;0;0"
         P.append(f'<rect y="{PAD}" width="{max(1.0, SCALE*0.75)}" height="{m["h"]}" fill="#e2e8f0" opacity="0">'
-                 f'<animate attributeName="x" values="{fmt(xs)}" keyTimes="{fmt(ks)}" dur="{CYCLE}s" repeatCount="indefinite"/>'
+                 f'<animate attributeName="x" calcMode="discrete" values="{fmt(xs)}" keyTimes="{fmt(ks)}" dur="{CYCLE}s" repeatCount="indefinite"/>'
                  f'<animate attributeName="opacity" values="{ov}" keyTimes="{ok}" dur="{CYCLE}s" repeatCount="indefinite"/>'
                  f'</rect>')
     P.append("</svg>")
