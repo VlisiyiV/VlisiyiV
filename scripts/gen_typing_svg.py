@@ -19,6 +19,7 @@ SPACE_DELAY = CHAR_DELAY * 0.5   # 空格额外停顿 -> 词间隔 = 1.5 字
 PUNCT = set("，。；：！？、,.;:!?…—")
 FG, CURSOR, BG = "#22d3ee", "#e2e8f0", "#0d1117"
 CURSOR_W = 8   # 光标整块宽度
+TRACKING = 2   # 字间距(px): 解决 rn 粘连成 m
 
 ITEMS = ["原神", "明日方舟", "明日方舟：终末地", "Minecraft", "Github", "VS Code",
          "DeepSeek Harness", "ESP32 S3", "ESP8266", "Arduino IDE", "Arduino UNO"]
@@ -62,13 +63,13 @@ def runs_of(img):
 def char_cells(t, font):
     """返回每字: (runs, adv_before, adv_after) —— 每字独立完整渲染。"""
     total_adv = int(font.getlength(t))
-    W = PAD * 2 + total_adv + 8
+    W = PAD * 2 + total_adv + TRACKING * max(0, len(t) - 1) + 8
     cells = []
     for i, ch in enumerate(t):
-        adv_b = font.getlength(t[:i])
-        adv_a = font.getlength(t[:i + 1])
+        adv_b = font.getlength(t[:i]) + i * TRACKING
+        adv_a = font.getlength(t[:i + 1]) + (i + 1) * TRACKING
         img = Image.new("L", (W, SIZE + PAD * 2), 255)
-        ImageDraw.Draw(img).text((PAD + adv_b, PAD), ch, font=font, fill=0)
+        ImageDraw.Draw(img).text((int(PAD + adv_b + 0.5), PAD), ch, font=font, fill=0)
         cells.append((runs_of(img), adv_b, adv_a))
     return cells, W
 
