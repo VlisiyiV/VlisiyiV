@@ -16,10 +16,15 @@ from PIL import Image, ImageDraw, ImageFont
 SIZE, IDX, SCALE, PAD = 16, 2, 2, 2
 CHAR_DELAY, PUNCT_DELAY, HOLD, TAIL = 0.08, 0.45, 2.20, 0.40
 SPACE_DELAY = CHAR_DELAY * 0.5   # 空格额外停顿 -> 词间隔 = 1.5 字
+CJK_DELAY  = CHAR_DELAY * 1.5   # 中文字停顿 = 1.5 倍字母停顿
+
+
+def is_cjk(ch):
+    return "\u3400" <= ch <= "\u9fff" or "\uf900" <= ch <= "\ufaff"
 PUNCT = set("，。；：！？、,.;:!?…—")
 FG, CURSOR, BG = "#22d3ee", "#e2e8f0", "#0d1117"
 CURSOR_W = 8   # 光标整块宽度
-TRACKING = 2   # 字间距(px): 解决 rn 粘连成 m
+TRACKING = 1   # 字间距(px): 解决 rn 粘连成 m
 
 ITEMS = ["原神", "明日方舟", "明日方舟：终末地", "Minecraft", "Github", "VS Code",
          "DeepSeek Harness", "ESP32 S3", "ESP8266", "Arduino IDE", "Arduino UNO"]
@@ -85,12 +90,12 @@ def main():
         # 每字出现时刻
         acc, times = 0.0, []
         for ch in t:
-            acc += CHAR_DELAY
+            acc += CJK_DELAY if is_cjk(ch) else CHAR_DELAY
+            times.append(acc)                 # 本字(含符号)出现时刻
             if ch in PUNCT:
-                acc += PUNCT_DELAY
+                acc += PUNCT_DELAY            # 符号"后"停顿 -> 只推迟下一个字
             elif ch == " ":
-                acc += SPACE_DELAY
-            times.append(acc)
+                acc += SPACE_DELAY            # 词间隔
         metas.append(dict(t=t, cells=cells, times=times, type=acc))
         maxW = max(maxW, W)
 
