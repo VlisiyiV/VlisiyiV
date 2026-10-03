@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 SIZE, IDX, SCALE, PAD = 16, 2, 2, 2
 CHAR_DELAY, PUNCT_DELAY, HOLD, TAIL = 0.08, 0.45, 2.20, 0.40
-SPACE_GAP  = CHAR_DELAY * 1.5   # 词间隔: 空格作为"分隔符"(不占字停顿)
+SPACE_GAP  = CHAR_DELAY * 2     # 词间隔: 空格后停顿 = 2 倍字停顿
 CJK_DELAY  = CHAR_DELAY * 1.5   # 中文字停顿 = 1.5 倍字母停顿
 
 
