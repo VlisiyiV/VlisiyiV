@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 SIZE, IDX, SCALE, PAD = 16, 2, 2, 2
 CHAR_DELAY, PUNCT_DELAY, HOLD, TAIL = 0.08, 0.45, 2.20, 0.40
-SPACE_DELAY = CHAR_DELAY * 0.5   # 空格额外停顿 -> 词间隔 = 1.5 字
+SPACE_GAP  = CHAR_DELAY * 1.5   # 词间隔: 空格作为"分隔符"(不占字停顿)
 CJK_DELAY  = CHAR_DELAY * 1.5   # 中文字停顿 = 1.5 倍字母停顿
 
 
@@ -90,12 +90,14 @@ def main():
         # 每字出现时刻
         acc, times = 0.0, []
         for ch in t:
+            if ch == " ":                     # 空格 = 分隔符(不占字停顿)
+                times.append(acc)
+                acc += SPACE_GAP              # 词间隔 = 1.5 字
+                continue
             acc += CJK_DELAY if is_cjk(ch) else CHAR_DELAY
             times.append(acc)                 # 本字(含符号)出现时刻
             if ch in PUNCT:
                 acc += PUNCT_DELAY            # 符号"后"停顿 -> 只推迟下一个字
-            elif ch == " ":
-                acc += SPACE_DELAY            # 词间隔
         metas.append(dict(t=t, cells=cells, times=times, type=acc))
         maxW = max(maxW, W)
 
